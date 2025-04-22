@@ -9,12 +9,12 @@
 #include <string>
 #include <memory>
 #include <map>
-#include <limits>    
-#include <cstdlib>   // For system() - already included via Game.hh now, but good practice
-#include <algorithm>
-#include <cctype>
-
-// ... (Rest of Game.cpp implementation remains the same) ...
+#include <limits>    // For std::numeric_limits
+#include <cstdlib>   // For system() and rand()/srand()
+#include <algorithm> // For std::max/min
+#include <cctype>    // For toupper
+#include <random>    // For random number generation (alternative to rand)
+#include <ctime>     // For seeding random number generator
 
 // Game Constructor
 Game::Game()
@@ -23,18 +23,26 @@ Game::Game()
     setupGame(); // Call setup logic
 }
 
+// Destructor defaulted in header
+
 // Game Setup Implementation
 void Game::setupGame() {
-    // --- Create Items ---
-    auto item1 = std::unique_ptr<Item>(new Item("Medkit", "Restores some health.", 0, 0, 30, true));
-    auto item2 = std::unique_ptr<Item>(new Item("Baseball Bat", "Good for bonking.", 5, 0, 0));
-    auto item3 = std::unique_ptr<Item>(new Item("Energy Drink", "Temporary stamina boost (effect not implemented).", 0, 0, 5, true));
-    auto item4 = std::unique_ptr<Item>(new Item("Body Armor", "Provides some protection.", 0, 5, 0));
-    auto item5 = std::unique_ptr<Item>(new Item("Canned Food", "Reduces hunger (effect not implemented).", 0, 0, 10, true));
-    auto item6 = std::unique_ptr<Item>(new Item("Rusty Pipe", "Better than nothing.", 3, 0, 0));
-    auto item7 = std::unique_ptr<Item>(new Item("Painkillers", "Helps ignore the pain (temp def boost?).", 0, 1, 5, true));
+    // Seed the random number generator once at the start
+    srand(static_cast<unsigned int>(time(nullptr)));
 
-    // --- Create Zombies ---
+    // --- 定义物品模板 ---
+    // Store templates for potential random generation
+    std::vector<Item> itemTemplates;
+    itemTemplates.emplace_back("Medkit", "Restores some health.", 0, 0, 30, true);           // 0
+    itemTemplates.emplace_back("Baseball Bat", "Good for bonking.", 5, 0, 0);                // 1
+    itemTemplates.emplace_back("Energy Drink", "Temporary stamina boost.", 0, 0, 5, true);   // 2
+    itemTemplates.emplace_back("Body Armor", "Provides some protection.", 0, 5, 0);         // 3
+    itemTemplates.emplace_back("Canned Food", "Reduces hunger.", 0, 0, 10, true);            // 4
+    itemTemplates.emplace_back("Rusty Pipe", "Better than nothing.", 3, 0, 0);               // 5
+    itemTemplates.emplace_back("Painkillers", "Helps ignore the pain.", 0, 1, 5, true);      // 6
+    itemTemplates.emplace_back("Bandage", "Stops minor bleeding.", 0, 0, 5, true);           // 7
+
+    // --- 创建僵尸 ---
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Walker", "Slow but persistent.", 50, 8, 1)));
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Runner", "Disturbingly fast.", 35, 12, 0)));
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Bloater", "Tough and resilient.", 80, 10, 4)));
@@ -42,48 +50,57 @@ void Game::setupGame() {
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Runner", "Quick and twitchy.", 35, 12, 0)));
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Crawler", "Low profile, surprisingly quick lunge.", 30, 7, 0)));
 
-    // --- Create Rooms (6 rooms) ---
-    rooms.push_back(std::unique_ptr<Room>(new Room("You stand on a cracked asphalt street. An eerie silence hangs in the air.", 1))); // 0
-    rooms.push_back(std::unique_ptr<Room>(new Room("Inside a ransacked convenience store. Empty shelves and broken glass.", 2))); // 1
-    rooms.push_back(std::unique_ptr<Room>(new Room("A dark alleyway, smelling of decay. A dead end.", 3)));                     // 2
-    rooms.push_back(std::unique_ptr<Room>(new Room("An abandoned office space. Papers litter the floor.", 4)));                 // 3
-    rooms.push_back(std::unique_ptr<Room>(new Room("The main lobby of a deserted building. Seems secure for now.", 5)));       // 4 END
-    rooms.push_back(std::unique_ptr<Room>(new Room("A collapsed section of a parking garage. Watch your step.", 6)));          // 5
+    // --- 创建房间 (指定效果) ---
+    // [1] [2] [3]
+    // [4] [5] [6]
+    rooms.push_back(std::unique_ptr<Room>(new Room("You stand on a cracked asphalt street...", 1, RoomEffect::NONE))); // 0 START
+    rooms.push_back(std::unique_ptr<Room>(new Room("Inside a ransacked convenience store...", 2, RoomEffect::DAMAGE_SMALL))); // 1 Damage Effect
+    rooms.push_back(std::unique_ptr<Room>(new Room("A dark alleyway, smelling of decay...", 3, RoomEffect::NONE))); // 2
+    rooms.push_back(std::unique_ptr<Room>(new Room("An abandoned office space...", 4, RoomEffect::HEAL_SMALL))); // 3 Heal Effect
+    rooms.push_back(std::unique_ptr<Room>(new Room("The main lobby of a deserted building...", 5, RoomEffect::NONE))); // 4 END
+    rooms.push_back(std::unique_ptr<Room>(new Room("A collapsed section of a parking garage...", 6, RoomEffect::NONE))); // 5
 
-    // --- Link Rooms (Indices: N=0, S=1, E=2, W=3) ---
-    rooms[0]->setPath(2, rooms[1].get()); // 1 E -> 2
-    rooms[0]->setPath(1, rooms[3].get()); // 1 S -> 4 
-    rooms[1]->setPath(3, rooms[0].get()); // 2 W -> 1
-    rooms[1]->setPath(1, rooms[4].get()); // 2 S -> 5 (End)
-    rooms[1]->setPath(2, rooms[2].get()); // 2 E -> 3
-    rooms[2]->setPath(1, rooms[5].get()); // 3 S -> 6
-    rooms[2]->setPath(3, rooms[1].get()); // 3 W -> 2
-    rooms[3]->setPath(2, rooms[4].get()); // 4 E -> 5 (End)
-    rooms[3]->setPath(0, rooms[0].get()); // 4 N -> 1 
-    rooms[4]->setPath(0, rooms[1].get()); // 5 N -> 2
-    rooms[4]->setPath(3, rooms[3].get()); // 5 W -> 4
-    rooms[4]->setPath(2, rooms[5].get()); // 5 E -> 6
-    rooms[5]->setPath(0, rooms[2].get()); // 6 N -> 3
-    rooms[5]->setPath(3, rooms[4].get()); // 6 W -> 5 (End)
+    // --- 连接房间 ---
+    rooms[0]->setPath(2, rooms[1].get()); rooms[0]->setPath(1, rooms[3].get()); // Room 1 exits
+    rooms[1]->setPath(3, rooms[0].get()); rooms[1]->setPath(1, rooms[4].get()); rooms[1]->setPath(2, rooms[2].get()); // Room 2 exits
+    rooms[2]->setPath(1, rooms[5].get()); rooms[2]->setPath(3, rooms[1].get()); // Room 3 exits
+    rooms[3]->setPath(0, rooms[0].get()); rooms[3]->setPath(2, rooms[4].get()); // Room 4 exits
+    rooms[4]->setPath(0, rooms[1].get()); rooms[4]->setPath(3, rooms[3].get()); rooms[4]->setPath(2, rooms[5].get()); // Room 5 exits
+    rooms[5]->setPath(0, rooms[2].get()); rooms[5]->setPath(3, rooms[4].get()); // Room 6 exits
 
-    // --- Place Items ---
-    rooms[0]->addItem(std::move(item6)); // Room 1
-    rooms[1]->addItem(std::move(item3)); // Room 2
-    rooms[2]->addItem(std::move(item5)); // Room 3
-    rooms[3]->addItem(std::move(item1)); // Room 4
-    rooms[5]->addItem(std::move(item7)); // Room 6
-    rooms[4]->addItem(std::move(item2)); // Room 5 (End)
-    rooms[4]->addItem(std::move(item4)); // Room 5 (End)
+    // --- 随机 + 固定放置物品 ---
+    if (!itemTemplates.empty()) {
+        // Place starting item
+        rooms[0]->addItem(std::unique_ptr<Item>(new Item(itemTemplates[5]))); // Rusty Pipe in Start Room (1)
 
-    // --- Place Zombies ---
+        // Random items in other non-end rooms
+        for (size_t i = 1; i < rooms.size(); ++i) { // Start from index 1 (Room 2)
+            if (rooms[i]->getRoomNumber() != 5) { // Skip the end room for random placement
+                // 60% chance to spawn one item
+                if ((rand() % 100) < 60) {
+                    int itemIndex = rand() % itemTemplates.size(); // Random template index
+                    // Ensure we don't duplicate unique items if needed (simple version allows duplicates)
+                    rooms[i]->addItem(std::unique_ptr<Item>(new Item(itemTemplates[itemIndex])));
+                    // std::cout << "DEBUG: Added random " << itemTemplates[itemIndex].name << " to Room " << rooms[i]->getRoomNumber() << std::endl;
+                }
+                 // Could add logic for a second item spawn chance here
+            }
+        }
+        // Place guaranteed items in the end room
+        rooms[4]->addItem(std::unique_ptr<Item>(new Item(itemTemplates[1]))); // Baseball Bat
+        rooms[4]->addItem(std::unique_ptr<Item>(new Item(itemTemplates[3]))); // Body Armor
+    }
+
+
+    // --- 放置僵尸 ---
     rooms[1]->addZombie(allZombies[0].get()); // Room 2
     rooms[2]->addZombie(allZombies[5].get()); // Room 3
     rooms[3]->addZombie(allZombies[3].get()); // Room 4
     rooms[5]->addZombie(allZombies[1].get()); // Room 6
     rooms[5]->addZombie(allZombies[4].get()); // Room 6
-    rooms[2]->addZombie(allZombies[2].get()); // Room 5 (End)
+    rooms[2]->addZombie(allZombies[2].get()); // Room 3 
 
-    // --- Set initial state ---
+    // --- 设置初始状态 ---
     currentRoom = rooms[0].get();
     player.updateStatsFromInventory();
 }
@@ -158,11 +175,9 @@ int Game::getPlayerInput(int minChoice, int maxChoice, const std::string& prompt
     while (!(std::cin >> choice) || choice < minChoice || choice > maxChoice) {
         std::cout << "Invalid input. Please enter a number between " << minChoice << " and " << maxChoice << ": ";
         std::cin.clear();
-        // <<<--- Requires <limits> --- >>>
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Requires <limits>
     }
-     // <<<--- Requires <limits> --- >>>
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Requires <limits>
     return choice;
 }
 
@@ -178,9 +193,16 @@ void Game::processPlayerAction(int choice) {
         case ActionType::MOVE: {
             Room* nextRoom = currentRoom->getPath(action.targetIndex);
             if (nextRoom) {
-                currentRoom = nextRoom;
+                currentRoom = nextRoom; // Update current room
                 std::cout << "You move " << Room::directionName(action.targetIndex) << "." << std::endl;
-                if (currentRoom->getRoomNumber() == 5) { // Check win condition (Room 5)
+                applyRoomEffect(currentRoom); // <<<--- Apply effect AFTER moving
+                if (playerWon) return; // If effect caused win (unlikely but possible), stop
+                if (!player.isAlive()) { // If effect caused death
+                    gameOver = true;
+                    return;
+                }
+                // Check win condition based on room number
+                if (currentRoom->getRoomNumber() == 5) {
                     playerWon = true;
                 }
             } else {
@@ -284,12 +306,43 @@ void Game::handleEnemyTurn() {
     std::cout << "------------------" << std::endl;
 }
 
+// <<<--- Implementation for applyRoomEffect --- >>>
+void Game::applyRoomEffect(Room* room) {
+    if (!room || !player.isAlive()) { // Safety checks
+        return;
+    }
+
+    switch (room->getEffect()) {
+        case RoomEffect::HEAL_SMALL:
+            std::cout << "You feel a soothing presence in this room." << std::endl;
+            player.heal(10); // Call player's heal method
+            break;
+        case RoomEffect::DAMAGE_SMALL:
+            std::cout << "A wave of nausea washes over you in this room!" << std::endl;
+            player.takeDamage(5); // Apply damage to player
+            // Check if player died from room effect
+            if (!player.isAlive()) {
+                gameOver = true;
+            }
+            break;
+        case RoomEffect::NONE:
+        default:
+            // No effect
+            break;
+    }
+}
+
+
 // Game Run Implementation
 void Game::run() {
     if (!currentRoom) {
          std::cerr << "Error: Game setup failed, no starting room!" << std::endl;
          return;
     }
+
+    // Apply effect of the starting room immediately
+    applyRoomEffect(currentRoom);
+    if (!player.isAlive()) { gameOver = true; } // Check if died in starting room
 
     while (!gameOver && !playerWon) {
         displayCurrentState(); // Show room, player, menu

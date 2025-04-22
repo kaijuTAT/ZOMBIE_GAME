@@ -6,13 +6,18 @@
 #include <string>
 #include <memory>
 #include <map>
-#include <cstdlib>   // <<<--- ADDED for system() used via CLEAR_SCREEN
+#include <cstdlib>   // For system() used via CLEAR_SCREEN
 #include "Player.hh" // Include Player definition
 #include "Action.hh" // Include Action definitions
-#include "Room.hh"   // <<<--- ADDED FULL INCLUDE (replaces forward declaration)
-#include "Zombie.hh" // <<<--- ADDED FULL INCLUDE (replaces forward declaration)
+#include "Room.hh"   // Include Room definition
+#include "Zombie.hh" // Include Zombie definition
 
-// <<<--- MOVED CLEAR_SCREEN Definition Here --- >>>
+/**
+ * @file Game.hh
+ * @brief Defines the main Game class, responsible for managing the game state,
+ * game loop, player interactions, and overall flow.
+ */
+
 // Platform-specific clear screen command
 #ifdef _WIN32
 #define CLEAR_SCREEN "cls"
@@ -23,10 +28,10 @@
 // Game 类声明
 class Game {
 private:
-    Player player;
-    std::vector<std::unique_ptr<Room>> rooms;         // Owns rooms
-    std::vector<std::unique_ptr<Zombie>> allZombies; // Owns all zombies
-    Room* currentRoom;
+    Player player; // Game owns the player object
+    std::vector<std::unique_ptr<Room>> rooms;         // Game owns rooms via unique_ptr
+    std::vector<std::unique_ptr<Zombie>> allZombies; // Game owns all zombies via unique_ptr
+    Room* currentRoom; // Pointer to the current room (doesn't own)
     bool gameOver;
     bool playerWon;
     std::map<int, ActionInfo> currentActions; // Menu number -> Action
@@ -40,14 +45,24 @@ private:
     void processPlayerAction(int choice);
     void handleEnemyTurn();
     void displayEndGameMessage();
+    void applyRoomEffect(Room* room);
 
 public:
-    // 构造函数
+    // Constructor
     Game();
+
+    // --- Canonical Form (Rule of Five/Zero) ---
+    // Destructor is defaulted (unique_ptrs handle cleanup)
+    ~Game() = default;
+    // Delete copy operations (managing unique_ptrs and complex state)
+    Game(const Game&) = delete;
+    Game& operator=(const Game&) = delete;
+    // Default move operations (all members are movable or trivially movable)
+    Game(Game&&) noexcept = default;
+    Game& operator=(Game&&) noexcept = default;
+
     // 主运行函数
     void run();
-    // Destructor (default is fine now with includes)
-    ~Game() = default;
 };
 
 #endif // GAME_HH
