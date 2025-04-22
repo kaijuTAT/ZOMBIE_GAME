@@ -1,4 +1,3 @@
-```
 # Zomboid: Final Shelter - C++ Text-Based RPG
 
 ## 1. Project Overview
