@@ -59,7 +59,7 @@ void Game::setupGame() {
     rooms[2]->setPath(1, rooms[5].get()); // 3 S -> 6
     rooms[2]->setPath(3, rooms[1].get()); // 3 W -> 2
     rooms[3]->setPath(2, rooms[4].get()); // 4 E -> 5 (End)
-    rooms[3]->setPath(0, rooms[0].get()); // 4 N -> 1 <<<--- 添加这行
+    rooms[3]->setPath(0, rooms[0].get()); // 4 N -> 1 
     rooms[4]->setPath(0, rooms[1].get()); // 5 N -> 2
     rooms[4]->setPath(3, rooms[3].get()); // 5 W -> 4
     rooms[4]->setPath(2, rooms[5].get()); // 5 E -> 6
