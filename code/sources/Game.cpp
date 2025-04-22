@@ -52,12 +52,14 @@ void Game::setupGame() {
 
     // --- Link Rooms (Indices: N=0, S=1, E=2, W=3) ---
     rooms[0]->setPath(2, rooms[1].get()); // 1 E -> 2
+    rooms[0]->setPath(1, rooms[3].get()); // 1 S -> 4 
     rooms[1]->setPath(3, rooms[0].get()); // 2 W -> 1
     rooms[1]->setPath(1, rooms[4].get()); // 2 S -> 5 (End)
     rooms[1]->setPath(2, rooms[2].get()); // 2 E -> 3
     rooms[2]->setPath(1, rooms[5].get()); // 3 S -> 6
     rooms[2]->setPath(3, rooms[1].get()); // 3 W -> 2
     rooms[3]->setPath(2, rooms[4].get()); // 4 E -> 5 (End)
+    rooms[3]->setPath(0, rooms[0].get()); // 4 N -> 1 <<<--- 添加这行
     rooms[4]->setPath(0, rooms[1].get()); // 5 N -> 2
     rooms[4]->setPath(3, rooms[3].get()); // 5 W -> 4
     rooms[4]->setPath(2, rooms[5].get()); // 5 E -> 6
@@ -79,7 +81,7 @@ void Game::setupGame() {
     rooms[3]->addZombie(allZombies[3].get()); // Room 4
     rooms[5]->addZombie(allZombies[1].get()); // Room 6
     rooms[5]->addZombie(allZombies[4].get()); // Room 6
-    rooms[4]->addZombie(allZombies[2].get()); // Room 5 (End)
+    rooms[2]->addZombie(allZombies[2].get()); // Room 5 (End)
 
     // --- Set initial state ---
     currentRoom = rooms[0].get();
