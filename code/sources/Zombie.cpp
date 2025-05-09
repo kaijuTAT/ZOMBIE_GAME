@@ -7,7 +7,7 @@
 Zombie::Zombie(std::string n, std::string desc, unsigned hp, unsigned atk, unsigned def)
     : name(n), description(desc), maxHealth(hp), health(hp), attackPower(atk), defensePower(def) {}
 
-Zombie::~Zombie() = default;
+// Destructor defaulted in header
 
 bool Zombie::isAlive() const { return health > 0; }
 
@@ -58,4 +58,9 @@ std::unique_ptr<Item> Zombie::dropItem(size_t index) { return nullptr; }
 const std::vector<std::unique_ptr<Item>>& Zombie::getInventory() const {
     static const std::vector<std::unique_ptr<Item>> empty_inventory;
     return empty_inventory;
+}
+
+void Zombie::heal(unsigned amount) {
+    // Zombies typically don't heal themselves in this way
+    // No operation needed.
 }

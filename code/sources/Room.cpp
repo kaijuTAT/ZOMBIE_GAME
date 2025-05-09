@@ -1,19 +1,25 @@
 // ---------- src/Room.cpp ----------
-#include "../include/Room.hh"   // <<<--- UPDATED INCLUDE
-#include "../include/Zombie.hh" // <<<--- UPDATED INCLUDE
-#include "../include/Item.hh"   // <<<--- UPDATED INCLUDE
+#include "../include/Room.hh"   // Include Room header
+#include "../include/Zombie.hh" // Include Zombie definition for display
+#include "../include/Item.hh"   // Include Item definition for display
 #include <iostream>
 #include <cctype> // For toupper
 
-Room::Room(std::string desc, int number)
-    : description(desc), roomNumber(number) {
+// 构造函数实现 
+Room::Room(std::string desc, int number, RoomEffect initialEffect)
+    : description(desc), roomNumber(number), effect(initialEffect) {
     for (int i = 0; i < NUM_DIRECTIONS; ++i) { paths[i] = nullptr; }
 }
 
-Room::~Room() = default;
+// Destructor defaulted in header
 
 std::string Room::getDescription() const { return description; }
 int Room::getRoomNumber() const { return roomNumber; }
+
+// 获取房间效果实现 GET THE 
+RoomEffect Room::getEffect() const {
+    return effect;
+}
 
 void Room::setPath(int directionIndex, Room* room) {
     if (directionIndex >= 0 && directionIndex < NUM_DIRECTIONS) {
@@ -28,8 +34,7 @@ Room* Room::getPath(int directionIndex) const {
     return nullptr;
 }
 
-// Static methods defined in header are implicitly inline or need separate definition
-// Let's assume they are simple enough for header or defined here if complex
+// Static methods
 int Room::directionIndex(const std::string& direction) {
     std::string upperDir = direction;
     for (char &c : upperDir) { c = toupper(c); }
@@ -47,6 +52,7 @@ std::string Room::directionName(int i) {
     if (i == 3) return "West";
     return "Unknown";
 }
+// End Static methods
 
 void Room::addItem(std::unique_ptr<Item> item) {
     if (item) { items.push_back(std::move(item)); }
@@ -81,10 +87,24 @@ bool Room::removeZombiePtr(Zombie* zombieToRemove) {
 const std::vector<Zombie*>& Room::getZombies() const { return zombies; }
 std::vector<Zombie*>& Room::getZombies() { return zombies; }
 
+// 显示房间信息，包含效果提示 SHOWING THE IFORMATION OF THE ROOM, INCLUDE THE EFFECT
 void Room::displayRoomInfo() const {
     std::cout << "\n=== Room " << roomNumber << " ===" << std::endl;
     std::cout << description << std::endl;
 
+    // REPESENT THE EFFECT OF THE ROOM
+    switch(effect) {
+        case RoomEffect::HEAL_SMALL:
+            std::cout << "(You feel a faint sense of recovery here.)" << std::endl;
+            break;
+        case RoomEffect::DAMAGE_SMALL:
+            std::cout << "(The air here feels heavy and harmful.)" << std::endl;
+            break;
+        default: // RoomEffect::NONE or others
+            break;
+    }
+
+    // 显示物品 DISPLAY THE ITEM
     std::cout << "\nItems:" << std::endl;
     if (items.empty()) {
         std::cout << "  None" << std::endl;
@@ -96,6 +116,7 @@ void Room::displayRoomInfo() const {
         }
     }
 
+    // 显示敌人 DISPLAY THE ENIMY
     std::cout << "\nEnemies:" << std::endl;
     bool enemyFound = false;
     int enemyCount = 1;
@@ -109,6 +130,7 @@ void Room::displayRoomInfo() const {
         std::cout << "  None" << std::endl;
     }
 
+    // 显示出口 DISPLAY THE EXIT
     std::cout << "\nExits: ";
     bool exitFound = false;
     for (int i = 0; i < NUM_DIRECTIONS; ++i) {

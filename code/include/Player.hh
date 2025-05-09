@@ -1,13 +1,19 @@
-// ---------- include/Player.hh ---------- // <<<--- UPDATED FILENAME
-#ifndef PLAYER_HH // <<<--- UPDATED GUARD
-#define PLAYER_HH // <<<--- UPDATED GUARD
+// ---------- include/Player.hh ----------
+#ifndef PLAYER_HH
+#define PLAYER_HH
 
-#include "ICharacter.hh" // <<<--- UPDATED INCLUDE --- 包含接口定义
+#include "ICharacter.hh" // 包含接口定义
 #include <vector>
 #include <string>
-#include <memory>
+#include <memory> // For unique_ptr
 
-// 前向声明 Item, ICharacter 已包含
+/**
+ * @file Player.hh
+ * @brief Defines the Player class, representing the user-controlled character.
+ * Manages player stats, inventory, and actions, implementing ICharacter.
+ */
+
+// Forward declare Item struct if needed, but ICharacter includes it
 // struct Item;
 
 // Player 类声明
@@ -22,11 +28,22 @@ private:
     unsigned baseDefense;
     unsigned currentAttack;
     unsigned currentDefense;
-    std::vector<std::unique_ptr<Item>> inventory;
+    std::vector<std::unique_ptr<Item>> inventory; // Manages non-copyable resources
 
 public:
+    // Constructor
     Player(std::string n = "Survivor", std::string desc = "A lone survivor.", unsigned hp = 100, unsigned atk = 10, unsigned def = 5);
-    virtual ~Player() override; // Use override keyword
+
+    // --- Canonical Form (Rule of Five/Zero) ---
+    // Destructor is defaulted (unique_ptr handles cleanup)
+    virtual ~Player() override = default;
+    // Delete copy operations because inventory contains unique_ptr (non-copyable)
+    Player(const Player&) = delete;
+    Player& operator=(const Player&) = delete;
+    // Default move operations (unique_ptr is movable)
+    Player(Player&&) noexcept = default;
+    Player& operator=(Player&&) noexcept = default;
+
 
     // --- ICharacter 接口实现声明 ---
     bool isAlive() const override;
@@ -46,7 +63,8 @@ public:
     void useItem(size_t index) override;
     std::unique_ptr<Item> dropItem(size_t index) override;
     const std::vector<std::unique_ptr<Item>>& getInventory() const override;
+    void heal(unsigned amount) override; 
 };
 
-#endif // PLAYER_HH // <<<--- UPDATED GUARD
+#endif // PLAYER_HH
 

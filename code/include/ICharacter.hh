@@ -1,19 +1,26 @@
-// ---------- include/ICharacter.hh ---------- // <<<--- UPDATED FILENAME
-#ifndef ICHARACTER_HH // <<<--- UPDATED GUARD
-#define ICHARACTER_HH // <<<--- UPDATED GUARD
+// ---------- include/ICharacter.hh ----------
+#ifndef ICHARACTER_HH
+#define ICHARACTER_HH
 
 #include <string>
 #include <vector>
 #include <memory> // For unique_ptr
 
-// 前向声明 Item 结构体，避免在头文件中包含 Item.hh 的全部内容 (如果 Item 定义很大)
-// 但因为 Item 很小且在此处被广泛使用 (unique_ptr<Item>), 直接包含更方便
-#include "Item.hh" // <<<--- UPDATED INCLUDE --- Item is used directly in method signatures
+#include "Item.hh" // Needs Item definition for unique_ptr<Item>
+
+/**
+ * @file ICharacter.hh
+ * @brief Defines the ICharacter interface, specifying the common contract
+ * for all characters (Player and Zombie) in the game.
+ */
 
 // 角色行为的统一接口规范
 class ICharacter {
 public:
+    // Virtual destructor is essential for polymorphic base classes
     virtual ~ICharacter() = default;
+
+    // --- Pure Virtual Functions (Must be implemented by derived classes) ---
     virtual bool isAlive() const = 0;
     virtual bool takeDamage(unsigned damage) = 0;
     virtual bool attack(ICharacter& target) = 0;
@@ -31,6 +38,18 @@ public:
     virtual void useItem(size_t index) = 0;
     virtual std::unique_ptr<Item> dropItem(size_t index) = 0;
     virtual const std::vector<std::unique_ptr<Item>>& getInventory() const = 0;
+    virtual void heal(unsigned amount) = 0; 
+    // --- Canonical Form (Interface specific) ---
+    // Interfaces typically don't need copy/move operations defined,
+    // but deleting them prevents slicing if someone tries to copy via the interface.
+    ICharacter(const ICharacter&) = delete;
+    ICharacter& operator=(const ICharacter&) = delete;
+    ICharacter(ICharacter&&) = delete;
+    ICharacter& operator=(ICharacter&&) = delete;
+
+protected:
+    // Protected default constructor to allow derived class construction
+    ICharacter() = default;
 };
 
-#endif // ICHARACTER_HH // <<<--- UPDATED GUARD
+#endif // ICHARACTER_HH

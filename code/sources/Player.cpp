@@ -11,7 +11,7 @@ Player::Player(std::string n, std::string desc, unsigned hp, unsigned atk, unsig
     inventory.reserve(10);
 }
 
-Player::~Player() = default; // unique_ptr handles cleanup
+// Destructor defaulted in header
 
 bool Player::isAlive() const { return health > 0; }
 
@@ -130,4 +130,17 @@ std::unique_ptr<Item> Player::dropItem(size_t index) {
 
 const std::vector<std::unique_ptr<Item>>& Player::getInventory() const {
     return inventory;
+}
+
+
+void Player::heal(unsigned amount) {
+    if (amount == 0 || !isAlive()) { // CANNOT ILL THE PLAYER OR THE PLAYER IS DEAD
+        return;
+    }
+    unsigned oldHealth = health;
+    health = std::min(health + amount, currentMaxHealth); // TREATMENT, BUT HP IS NOT OVER 100;
+    unsigned healedAmount = health - oldHealth; // CALCULATE THE TRUE HP STATUS
+    if (healedAmount > 0) {
+        std::cout << getName() << " recovers " << healedAmount << " HP." << std::endl;
+    }
 }
