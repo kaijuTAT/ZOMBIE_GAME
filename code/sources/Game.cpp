@@ -30,7 +30,7 @@ void Game::setupGame() {
     // Seed the random number generator once at the start
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    // --- 定义物品模板 ---
+    // --- 定义物品模板 --- DEFINE THE ITEM BOARD
     // Store templates for potential random generation
     std::vector<Item> itemTemplates;
     itemTemplates.emplace_back("Medkit", "Restores some health.", 0, 0, 30, true);           // 0
@@ -42,7 +42,7 @@ void Game::setupGame() {
     itemTemplates.emplace_back("Painkillers", "Helps ignore the pain.", 0, 1, 5, true);      // 6
     itemTemplates.emplace_back("Bandage", "Stops minor bleeding.", 0, 0, 5, true);           // 7
 
-    // --- 创建僵尸 ---
+    // --- 创建僵尸 --- CREAT THE ZOMBIE
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Walker", "Slow but persistent.", 50, 8, 1)));
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Runner", "Disturbingly fast.", 35, 12, 0)));
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Bloater", "Tough and resilient.", 80, 10, 4)));
@@ -50,7 +50,7 @@ void Game::setupGame() {
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Runner", "Quick and twitchy.", 35, 12, 0)));
     allZombies.push_back(std::unique_ptr<Zombie>(new Zombie("Crawler", "Low profile, surprisingly quick lunge.", 30, 7, 0)));
 
-    // --- 创建房间 (指定效果) ---
+    // --- 创建房间 (指定效果) --- CREATE ROOMS
     // [1] [2] [3]
     // [4] [5] [6]
     rooms.push_back(std::unique_ptr<Room>(new Room("You stand on a cracked asphalt street...", 1, RoomEffect::NONE))); // 0 START
@@ -60,7 +60,7 @@ void Game::setupGame() {
     rooms.push_back(std::unique_ptr<Room>(new Room("The main lobby of a deserted building...", 5, RoomEffect::NONE))); // 4 END
     rooms.push_back(std::unique_ptr<Room>(new Room("A collapsed section of a parking garage...", 6, RoomEffect::NONE))); // 5
 
-    // --- 连接房间 ---
+    // --- 连接房间 --- CONNET ROOMS
     rooms[0]->setPath(2, rooms[1].get()); rooms[0]->setPath(1, rooms[3].get()); // Room 1 exits
     rooms[1]->setPath(3, rooms[0].get()); rooms[1]->setPath(1, rooms[4].get()); rooms[1]->setPath(2, rooms[2].get()); // Room 2 exits
     rooms[2]->setPath(1, rooms[5].get()); rooms[2]->setPath(3, rooms[1].get()); // Room 3 exits
@@ -68,7 +68,7 @@ void Game::setupGame() {
     rooms[4]->setPath(0, rooms[1].get()); rooms[4]->setPath(3, rooms[3].get()); rooms[4]->setPath(2, rooms[5].get()); // Room 5 exits
     rooms[5]->setPath(0, rooms[2].get()); rooms[5]->setPath(3, rooms[4].get()); // Room 6 exits
 
-    // --- 随机 + 固定放置物品 ---
+    // --- 随机 + 固定放置物品 --- RANDOMLY + DESIGNED PLACE THE ITEM
     if (!itemTemplates.empty()) {
         // Place starting item
         rooms[0]->addItem(std::unique_ptr<Item>(new Item(itemTemplates[5]))); // Rusty Pipe in Start Room (1)
@@ -92,7 +92,7 @@ void Game::setupGame() {
     }
 
 
-    // --- 放置僵尸 ---
+    // --- 放置僵尸 --- DEPLOY THE ZOMBIES
     rooms[1]->addZombie(allZombies[0].get()); // Room 2
     rooms[2]->addZombie(allZombies[5].get()); // Room 3
     rooms[3]->addZombie(allZombies[3].get()); // Room 4
@@ -100,7 +100,7 @@ void Game::setupGame() {
     rooms[5]->addZombie(allZombies[4].get()); // Room 6
     rooms[2]->addZombie(allZombies[2].get()); // Room 3 
 
-    // --- 设置初始状态 ---
+    // --- 设置初始状态 --- SET THE INITIAL STATUS
     currentRoom = rooms[0].get();
     player.updateStatsFromInventory();
 }

@@ -15,13 +15,12 @@
 
 // 定义房间可能具有的特殊效果
 enum class RoomEffect {
-    NONE,         // 无特殊效果
-    HEAL_SMALL,   // 进入时少量回血
-    DAMAGE_SMALL  // 进入时受到少量伤害
-    // 可以添加更多效果类型
+    NONE,         // 无特殊效果 NO SPECLIAL FUNCTION
+    HEAL_SMALL,   // 进入时少量回血 WHEN PLAYER ENTER THE ROOM, RECOVER LITTLE HP
+    DAMAGE_SMALL  // 进入时受到少量伤害 WHEN PLAYER ENTER THE ROOM, TOOK LITTLE DAMAGE 
 };
 
-// 前向声明 Zombie 类，避免循环包含
+// 前向声明 Zombie 类，避免循环包含 FIRT DECLAR THE ZOMBIE CLASS, TO AVOID THE LOOP
 class Zombie;
 
 const int NUM_DIRECTIONS = 4; // N, S, E, W

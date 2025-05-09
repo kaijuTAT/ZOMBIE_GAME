@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cctype> // For toupper
 
-// 构造函数实现 (初始化效果)
+// 构造函数实现 
 Room::Room(std::string desc, int number, RoomEffect initialEffect)
     : description(desc), roomNumber(number), effect(initialEffect) {
     for (int i = 0; i < NUM_DIRECTIONS; ++i) { paths[i] = nullptr; }
@@ -16,7 +16,7 @@ Room::Room(std::string desc, int number, RoomEffect initialEffect)
 std::string Room::getDescription() const { return description; }
 int Room::getRoomNumber() const { return roomNumber; }
 
-// 获取房间效果实现
+// 获取房间效果实现 GET THE 
 RoomEffect Room::getEffect() const {
     return effect;
 }
@@ -87,12 +87,12 @@ bool Room::removeZombiePtr(Zombie* zombieToRemove) {
 const std::vector<Zombie*>& Room::getZombies() const { return zombies; }
 std::vector<Zombie*>& Room::getZombies() { return zombies; }
 
-// 显示房间信息，包含效果提示
+// 显示房间信息，包含效果提示 SHOWING THE IFORMATION OF THE ROOM, INCLUDE THE EFFECT
 void Room::displayRoomInfo() const {
     std::cout << "\n=== Room " << roomNumber << " ===" << std::endl;
     std::cout << description << std::endl;
 
-    // 可选：显示房间效果提示
+    // REPESENT THE EFFECT OF THE ROOM
     switch(effect) {
         case RoomEffect::HEAL_SMALL:
             std::cout << "(You feel a faint sense of recovery here.)" << std::endl;
@@ -104,7 +104,7 @@ void Room::displayRoomInfo() const {
             break;
     }
 
-    // 显示物品
+    // 显示物品 DISPLAY THE ITEM
     std::cout << "\nItems:" << std::endl;
     if (items.empty()) {
         std::cout << "  None" << std::endl;
@@ -116,7 +116,7 @@ void Room::displayRoomInfo() const {
         }
     }
 
-    // 显示敌人
+    // 显示敌人 DISPLAY THE ENIMY
     std::cout << "\nEnemies:" << std::endl;
     bool enemyFound = false;
     int enemyCount = 1;
@@ -130,7 +130,7 @@ void Room::displayRoomInfo() const {
         std::cout << "  None" << std::endl;
     }
 
-    // 显示出口
+    // 显示出口 DISPLAY THE EXIT
     std::cout << "\nExits: ";
     bool exitFound = false;
     for (int i = 0; i < NUM_DIRECTIONS; ++i) {

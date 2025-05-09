@@ -2,7 +2,7 @@
 #ifndef ZOMBIE_HH
 #define ZOMBIE_HH
 
-#include "ICharacter.hh" // 包含接口定义
+#include "ICharacter.hh" // 包含接口定义 INCLUDE THE DECLARATION OF THE INTERFACES
 #include <vector>
 #include <string>
 #include <memory> // For unique_ptr in getInventory return
@@ -16,7 +16,7 @@
 // Forward declare Item struct if needed, but ICharacter includes it
 // struct Item;
 
-// Zombie 类声明
+// Zombie 类声明 ZOMBIE CLASS DECLARATION
 class Zombie : public ICharacter {
 private:
     std::string name;

@@ -134,12 +134,12 @@ const std::vector<std::unique_ptr<Item>>& Player::getInventory() const {
 
 
 void Player::heal(unsigned amount) {
-    if (amount == 0 || !isAlive()) { // 不能治疗 0 点或死亡状态
+    if (amount == 0 || !isAlive()) { // CANNOT ILL THE PLAYER OR THE PLAYER IS DEAD
         return;
     }
     unsigned oldHealth = health;
-    health = std::min(health + amount, currentMaxHealth); // 治疗，不超过最大生命值
-    unsigned healedAmount = health - oldHealth; // 计算实际治疗量
+    health = std::min(health + amount, currentMaxHealth); // TREATMENT, BUT HP IS NOT OVER 100;
+    unsigned healedAmount = health - oldHealth; // CALCULATE THE TRUE HP STATUS
     if (healedAmount > 0) {
         std::cout << getName() << " recovers " << healedAmount << " HP." << std::endl;
     }
